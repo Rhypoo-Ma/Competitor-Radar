@@ -2,18 +2,28 @@ import { useState, useMemo } from 'react';
 import Head from 'next/head';
 
 const TYPE_TAGS = {
-  '组织架构': { color: 'bg-purple-600', label: '组织架构' },
-  '人才流动': { color: 'bg-amber-500', label: '人才流动' },
-  '融资': { color: 'bg-emerald-500', label: '融资' },
-  '产品': { color: 'bg-blue-500', label: '产品/战略' },
-  '招聘': { color: 'bg-pink-500', label: '招聘扩招' },
-  '合作': { color: 'bg-slate-500', label: '合作/政策' }
+  '组织架构': { color: 'bg-purple-600', label: '组织架构', icon: '🏢' },
+  '人才流动': { color: 'bg-amber-500', label: '人才流动', icon: '👤' },
+  '融资': { color: 'bg-emerald-500', label: '融资', icon: '💰' },
+  '产品': { color: 'bg-blue-500', label: '产品/战略', icon: '🚀' },
+  '招聘': { color: 'bg-pink-500', label: '招聘扩招', icon: '📢' },
+  '合作': { color: 'bg-slate-500', label: '合作/政策', icon: '🤝' }
 };
 
 const IMPACT_LABELS = {
-  high: { text: '高', color: 'bg-red-600' },
-  medium: { text: '中', color: 'bg-amber-500' },
-  low: { text: '低', color: 'bg-slate-500' }
+  high: { text: '高影响', color: 'bg-red-600' },
+  medium: { text: '中影响', color: 'bg-amber-500' },
+  low: { text: '低影响', color: 'bg-slate-500' }
+};
+
+const COMPANY_LOGOS = {
+  '字节跳动': '🔴',
+  '阿里巴巴': '🟠',
+  '月之暗面': '🌙',
+  'MiniMax': '💎',
+  '百度': '🔵',
+  '腾讯': '🟢',
+  '智谱AI': '🧠'
 };
 
 const MOCK_DATA = [
@@ -96,6 +106,7 @@ export default function Home() {
   const [selectedCompany, setSelectedCompany] = useState('全部');
   const [searchQuery, setSearchQuery] = useState('');
   const [impactFilter, setImpactFilter] = useState('全部');
+  const [expandedCard, setExpandedCard] = useState(null);
 
   const tabs = ['全部', '组织架构', '人才流动', '融资', '产品', '招聘', '合作'];
   const companies = ['全部', ...Array.from(new Set(MOCK_DATA.map(d => d.company)))];
@@ -127,148 +138,217 @@ export default function Home() {
     return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
   }, [filteredData]);
 
+  const getWeekday = (dateStr) => {
+    const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    return days[new Date(dateStr).getDay()];
+  };
+
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    return `${d.getMonth() + 1}月${d.getDate()}日`;
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
       <Head>
         <title>竞对情报中心 | 月之暗面</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <header className="border-b border-slate-700 bg-slate-800/50 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      {/* Hero Header */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(59,130,246,0.1),_transparent_50%)]" />
+        <div className="max-w-7xl mx-auto px-4 py-8 relative">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white">竞对情报中心</h1>
-              <p className="text-sm text-slate-400 mt-1">实时追踪AI行业核心动态 · 月之暗面HR</p>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg">
+                  🎯
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white tracking-tight">竞对情报中心</h1>
+                  <p className="text-sm text-slate-400">Competitor Intelligence Radar</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 mt-1">实时追踪AI行业核心动态 · 月之暗面HR</p>
             </div>
-            <div className="text-right text-sm text-slate-400">
-              <div>{new Date().toLocaleDateString('zh-CN')} 更新</div>
-              <div className="text-xs mt-1">共 {MOCK_DATA.length} 条动态</div>
+            <div className="text-right">
+              <div className="text-sm text-slate-400">{new Date().toLocaleDateString('zh-CN')}</div>
+              <div className="text-xs text-slate-500 mt-1">{MOCK_DATA.length} 条动态 · 2 条高影响</div>
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-red-400 mb-3 flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-            本周高影响动态（{highImpactItems.length}条）
-          </h2>
-          <div className="grid gap-3">
-            {highImpactItems.map(item => (
-              <div key={item.id} className="intel-card bg-slate-800 border border-slate-700 rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-bold text-white">{item.company}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded ${TYPE_TAGS[item.type].color} text-white`}>
-                        {TYPE_TAGS[item.type].label}
-                      </span>
-                      <span className={`text-xs px-2 py-0.5 rounded ${IMPACT_LABELS[item.impact].color} text-white`}>
-                        {IMPACT_LABELS[item.impact].text}影响
-                      </span>
+        {/* High Impact Banner */}
+        {highImpactItems.length > 0 && (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+              <h2 className="text-lg font-semibold text-red-400">本周高影响动态</h2>
+              <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">{highImpactItems.length} 条</span>
+            </div>
+            <div className="grid gap-3">
+              {highImpactItems.map(item => (
+                <div 
+                  key={item.id} 
+                  className="group relative bg-gradient-to-r from-slate-800/80 to-slate-800/40 border border-red-500/30 rounded-xl p-5 hover:border-red-500/50 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{COMPANY_LOGOS[item.company] || '🏢'}</span>
+                        <div>
+                          <span className="font-bold text-white text-lg">{item.company}</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={`text-xs px-2 py-0.5 rounded-md ${TYPE_TAGS[item.type].color} text-white font-medium`}>
+                              {TYPE_TAGS[item.type].icon} {TYPE_TAGS[item.type].label}
+                            </span>
+                            <span className={`text-xs px-2 py-0.5 rounded-md ${IMPACT_LABELS[item.impact].color} text-white font-medium`}>
+                              ⚠️ {IMPACT_LABELS[item.impact].text}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-slate-300">{formatDate(item.date)}</div>
+                        <div className="text-xs text-slate-500">{getWeekday(item.date)}</div>
+                      </div>
                     </div>
-                    <h3 className="font-semibold text-white">{item.title}</h3>
-                    <p className="text-sm text-slate-300 mt-1">{item.summary}</p>
+                    <h3 className="font-bold text-white text-lg mb-2">{item.title}</h3>
+                    <p className="text-slate-300 text-sm leading-relaxed">{item.summary}</p>
                     {item.notes && (
-                      <p className="text-xs text-slate-400 mt-2 italic">💡 {item.notes}</p>
+                      <div className="mt-3 flex items-start gap-2 text-xs text-amber-400 bg-amber-500/10 rounded-lg px-3 py-2">
+                        <span className="mt-0.5">💡</span>
+                        <span className="italic">{item.notes}</span>
+                      </div>
+                    )}
+                    {item.keyPeople && (
+                      <div className="mt-2 text-xs text-slate-400">
+                        👤 关键人物：<span className="text-slate-300">{item.keyPeople}</span>
+                      </div>
                     )}
                   </div>
-                  <span className="text-xs text-slate-500 whitespace-nowrap ml-4">{item.date}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
+        {/* Filters & Controls */}
         <section className="mb-6">
           <div className="flex flex-wrap gap-3 items-center">
-            <select 
-              value={selectedCompany} 
-              onChange={e => setSelectedCompany(e.target.value)}
-              className="bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
-            >
-              {companies.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-
-            <select 
-              value={impactFilter} 
-              onChange={e => setImpactFilter(e.target.value)}
-              className="bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
-            >
-              <option value="全部">全部影响</option>
-              <option value="high">高影响</option>
-              <option value="medium">中影响</option>
-              <option value="low">低影响</option>
-            </select>
-
-            <input 
-              type="text" 
-              placeholder="搜索标题、公司、人名..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white flex-1 min-w-[200px] focus:outline-none focus:border-blue-500"
-            />
-          </div>
-        </section>
-
-        <section className="mb-6">
-          <div className="flex gap-1 overflow-x-auto pb-2">
-            {tabs.map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeTab === tab 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                }`}
+            <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-2 border border-slate-700">
+              <span className="text-slate-500 text-sm">🏢</span>
+              <select 
+                value={selectedCompany} 
+                onChange={e => setSelectedCompany(e.target.value)}
+                className="bg-transparent text-sm text-white focus:outline-none cursor-pointer"
               >
-                {tab}
-                {tab !== '全部' && (
-                  <span className="ml-1.5 text-xs opacity-70">
-                    {MOCK_DATA.filter(d => d.type === tab).length}
-                  </span>
-                )}
-              </button>
-            ))}
+                {companies.map(c => <option key={c} value={c} className="bg-slate-800">{c}</option>)}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-2 border border-slate-700">
+              <span className="text-slate-500 text-sm">⚡</span>
+              <select 
+                value={impactFilter} 
+                onChange={e => setImpactFilter(e.target.value)}
+                className="bg-transparent text-sm text-white focus:outline-none cursor-pointer"
+              >
+                <option value="全部" className="bg-slate-800">全部影响</option>
+                <option value="high" className="bg-slate-800">高影响</option>
+                <option value="medium" className="bg-slate-800">中影响</option>
+                <option value="low" className="bg-slate-800">低影响</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-2 border border-slate-700 flex-1 min-w-[200px]">
+              <span className="text-slate-500 text-sm">🔍</span>
+              <input 
+                type="text" 
+                placeholder="搜索标题、公司、人名..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="bg-transparent text-sm text-white focus:outline-none w-full placeholder-slate-500"
+              />
+            </div>
           </div>
         </section>
 
+        {/* Category Tabs */}
+        <section className="mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {tabs.map(tab => {
+              const count = tab === '全部' ? MOCK_DATA.length : MOCK_DATA.filter(d => d.type === tab).length;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                    activeTab === tab 
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25' 
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 border border-slate-700'
+                  }`}
+                >
+                  {tab === '全部' ? '📋' : TYPE_TAGS[tab]?.icon || '📌'} {tab}
+                  <span className={`ml-1.5 text-xs ${activeTab === tab ? 'text-blue-200' : 'text-slate-500'}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Timeline */}
         <section>
           {groupedByDate.length === 0 ? (
-            <div className="text-center py-20 text-slate-500">
-              没有匹配的动态
+            <div className="text-center py-20">
+              <div className="text-4xl mb-3">🔍</div>
+              <div className="text-slate-500">没有匹配的动态</div>
+              <div className="text-sm text-slate-600 mt-1">试试调整筛选条件</div>
             </div>
           ) : (
             <div className="relative">
+              {/* Timeline Line */}
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-slate-600 via-slate-700 to-slate-800" />
+              
               {groupedByDate.map(([date, items]) => (
-                <div key={date} className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold">
-                      {new Date(date).getDate()}
+                <div key={date} className="mb-10 relative">
+                  {/* Date Marker */}
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="relative z-10 w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-slate-600 flex flex-col items-center justify-center shadow-lg">
+                      <span className="text-lg font-bold text-white">{new Date(date).getDate()}</span>
                     </div>
                     <div>
-                      <div className="font-medium">{date}</div>
-                      <div className="text-xs text-slate-400">
-                        {new Date(date).toLocaleDateString('zh-CN', { weekday: 'long' })}
-                      </div>
+                      <div className="font-bold text-white">{formatDate(date)}</div>
+                      <div className="text-xs text-slate-500">{getWeekday(date)} · {items.length} 条动态</div>
                     </div>
-                    <div className="flex-1 h-px bg-slate-700"></div>
-                    <span className="text-xs text-slate-500">{items.length} 条</span>
+                    <div className="flex-1 h-px bg-gradient-to-r from-slate-700 to-transparent" />
                   </div>
 
-                  <div className="grid gap-3 ml-12">
+                  {/* Cards */}
+                  <div className="ml-16 space-y-3">
                     {items.map(item => (
-                      <div key={item.id} className="intel-card bg-slate-800 border border-slate-700 rounded-lg p-4">
+                      <div 
+                        key={item.id} 
+                        className="group bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 hover:bg-slate-800 hover:border-slate-600 transition-all duration-300 cursor-pointer"
+                        onClick={() => setExpandedCard(expandedCard === item.id ? null : item.id)}
+                      >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
+                            <span className="text-xl">{COMPANY_LOGOS[item.company] || '🏢'}</span>
                             <span className="font-bold text-white">{item.company}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded ${TYPE_TAGS[item.type].color} text-white`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-md ${TYPE_TAGS[item.type].color} text-white font-medium`}>
                               {TYPE_TAGS[item.type].label}
                             </span>
-                            <span className={`text-xs px-2 py-0.5 rounded ${IMPACT_LABELS[item.impact].color} text-white`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-md ${IMPACT_LABELS[item.impact].color} text-white font-medium`}>
                               {IMPACT_LABELS[item.impact].text}
                             </span>
                           </div>
@@ -277,20 +357,35 @@ export default function Home() {
                               href={item.source} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-xs text-blue-400 hover:text-blue-300"
+                              className="text-xs text-blue-400 hover:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={e => e.stopPropagation()}
                             >
                               来源 ↗
                             </a>
                           )}
                         </div>
                         <h3 className="font-semibold text-white mb-1">{item.title}</h3>
-                        <p className="text-sm text-slate-300">{item.summary}</p>
-                        {item.keyPeople && (
-                          <p className="text-xs text-slate-400 mt-2">👤 关键人物：{item.keyPeople}</p>
+                        <p className="text-sm text-slate-300 leading-relaxed">{item.summary}</p>
+                        
+                        {expandedCard === item.id && (
+                          <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-2">
+                            {item.keyPeople && (
+                              <div className="text-xs text-slate-400">
+                                👤 关键人物：<span className="text-slate-300">{item.keyPeople}</span>
+                              </div>
+                            )}
+                            {item.notes && (
+                              <div className="flex items-start gap-2 text-xs text-amber-400 bg-amber-500/10 rounded-lg px-3 py-2">
+                                <span className="mt-0.5">💡</span>
+                                <span className="italic">{item.notes}</span>
+                              </div>
+                            )}
+                          </div>
                         )}
-                        {item.notes && (
-                          <p className="text-xs text-slate-400 mt-1 italic">💡 {item.notes}</p>
-                        )}
+                        
+                        <div className="mt-2 text-xs text-slate-600 group-hover:text-slate-500 transition-colors">
+                          点击展开详情
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -301,9 +396,10 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-slate-700 mt-12 py-6 text-center text-sm text-slate-500">
-        <p>数据来自飞书多维表格 · 每日自动同步</p>
-        <p className="mt-1">竞对情报中心 v1.0 · 月之暗面HR</p>
+      {/* Footer */}
+      <footer className="border-t border-slate-800 mt-12 py-6 text-center">
+        <p className="text-sm text-slate-500">数据来自飞书多维表格 · 每日自动同步</p>
+        <p className="text-xs text-slate-600 mt-1">竞对情报中心 v1.0 · 月之暗面HR</p>
       </footer>
     </div>
   );
