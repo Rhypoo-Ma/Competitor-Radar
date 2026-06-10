@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0F172A;
+  color: #F8FAFC;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1E293B;
+}
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748B;
+}
+
+/* Card hover effect */
+.intel-card {
+  transition: all 0.2s ease;
+}
+.intel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Tag colors */
+.tag-org { background: #8B5CF6; }
+.tag-talent { background: #F59E0B; }
+.tag-funding { background: #10B981; }
+.tag-product { background: #3B82F6; }
+.tag-hiring { background: #EC4899; }
+.tag-policy { background: #6B7280; }
+
+/* Impact badge */
+.impact-high { background: #DC2626; }
+.impact-medium { background: #F59E0B; }
+.impact-low { background: #6B7280; }
+
+/* Timeline */
+.timeline-line {
+  position: absolute;
+  left: 20px;
+  top: 40px;
+  bottom: 0;
+  width: 2px;
+  background: #334155;
+}
