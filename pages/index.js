@@ -134,7 +134,6 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      {/* Header */}
       <header className="border-b border-slate-700 bg-slate-800/50 backdrop-blur sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -151,7 +150,6 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Executive Summary - Boss View */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-red-400 mb-3 flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -184,10 +182,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Filters */}
         <section className="mb-6">
           <div className="flex flex-wrap gap-3 items-center">
-            {/* Company Filter */}
             <select 
               value={selectedCompany} 
               onChange={e => setSelectedCompany(e.target.value)}
@@ -196,7 +192,6 @@ export default function Home() {
               {companies.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
 
-            {/* Impact Filter */}
             <select 
               value={impactFilter} 
               onChange={e => setImpactFilter(e.target.value)}
@@ -208,7 +203,6 @@ export default function Home() {
               <option value="low">低影响</option>
             </select>
 
-            {/* Search */}
             <input 
               type="text" 
               placeholder="搜索标题、公司、人名..."
@@ -219,7 +213,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Tab Navigation */}
         <section className="mb-6">
           <div className="flex gap-1 overflow-x-auto pb-2">
             {tabs.map(tab => (
@@ -243,7 +236,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Timeline */}
         <section>
           {groupedByDate.length === 0 ? (
             <div className="text-center py-20 text-slate-500">
@@ -309,7 +301,6 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-slate-700 mt-12 py-6 text-center text-sm text-slate-500">
         <p>数据来自飞书多维表格 · 每日自动同步</p>
         <p className="mt-1">竞对情报中心 v1.0 · 月之暗面HR</p>
