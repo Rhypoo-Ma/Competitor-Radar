@@ -1,0 +1,43 @@
+{
+  "data": [
+    {
+      "id": "recvmktaipkGM3",
+      "company": "字节跳动",
+      "type": "人才流动",
+      "title": "豆包手机硬件产品负责人林夕离职，Ocean团队核心人才流失",
+      "summary": "豆包手机硬件产品负责人林夕已于近期离职，其此前负责字节AI硬件团队Ocean的终端硬件产品工作，该团队由字节原AI硬件负责人Kayden（原小米生态链高级产品总监）领导。这是字节AI硬件团队核心人才的一次流失。",
+      "date": "2026-06-13",
+      "source": "https://ai.cnmo.com/news/811119.html",
+      "impact": "高",
+      "keyPeople": "林夕",
+      "notes": "字节AI硬件团队核心人才流失",
+      "status": "已发布"
+    },
+    {
+      "id": "recvmktaipMFyL",
+      "company": "阿里巴巴",
+      "type": "组织架构",
+      "title": "合并通义大模型事业部和未来生活实验室，成立Token Foundry事业部",
+      "summary": "阿里巴巴合并通义大模型事业部和未来生活实验室，成立新的Token Foundry事业部，由集团CEO吴泳铭直接负责。同时，周靖人担任阿里巴巴首席科学家，牵头成立阿里巴巴AI未来研究院。",
+      "date": "2026-06-10",
+      "source": "https://www.caixin.com/2026-06-11/102453037.html",
+      "impact": "高",
+      "keyPeople": "吴泳铭、周靖人",
+      "notes": "组织架构重大调整，吴泳铭直接负责AI核心部门，周靖人升任首席科学家",
+      "status": "已发布"
+    },
+    {
+      "id": "recvmjAG6ZMUNB",
+      "company": "小米",
+      "type": "产品",
+      "title": "小米MiMo Code开源发布：首个国产大厂AI Coding Agent",
+      "summary": "小米MiMo技术团队发布AI编程助手MiMo Code，基于OpenCode开发，MIT协议开源。支持持久记忆、无限上下文、Compose模式，接入DeepSeek/Kimi/GLM等主流国产模型。实测代码任务优于Claude Code。",
+      "date": "2026-06-11",
+      "source": "https://juejin.cn/post/7650147286430826523",
+      "impact": "高",
+      "keyPeople": "",
+      "notes": "国产替代加速，首个国内大厂开源AI Coding Agent，多模型兼容。",
+      "status": "已发布"
+    }
+  ]
+}
