@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 
 const TYPE_TAGS = {
@@ -11,9 +11,9 @@ const TYPE_TAGS = {
 };
 
 const IMPACT_LABELS = {
-  high: { text: '高影响', color: 'bg-red-600' },
-  medium: { text: '中影响', color: 'bg-amber-500' },
-  low: { text: '低影响', color: 'bg-slate-500' }
+  '高': { text: '高影响', color: 'bg-red-600' },
+  '中': { text: '中影响', color: 'bg-amber-500' },
+  '低': { text: '低影响', color: 'bg-slate-500' }
 };
 
 const COMPANY_LOGOS = {
@@ -23,83 +23,17 @@ const COMPANY_LOGOS = {
   'MiniMax': '💎',
   '百度': '🔵',
   '腾讯': '🟢',
-  '智谱AI': '🧠'
+  '智谱AI': '🧠',
+  'DeepSeek': '🔷',
+  'OpenAI': '⚪',
+  'Anthropic': '🟡',
+  'Google': '🔶',
+  'Meta': '🟪'
 };
 
-const MOCK_DATA = [
-  {
-    id: '1',
-    company: '字节跳动',
-    type: '组织架构',
-    title: 'Flow部门负责人更换',
-    summary: 'Flow部门技术负责人离职，由智能创作团队负责人接任，内部震荡持续。',
-    date: '2026-06-08',
-    source: 'https://36kr.com',
-    impact: 'high',
-    keyPeople: '周靖人',
-    notes: '关注团队稳定性，可能有人员流动机会'
-  },
-  {
-    id: '2',
-    company: '阿里巴巴',
-    type: '人才流动',
-    title: '通义前首席科学家加入创业公司',
-    summary: '通义千问前核心科学家离职创立新公司，聚焦多模态Agent方向。',
-    date: '2026-06-07',
-    source: 'https://36kr.com',
-    impact: 'high',
-    keyPeople: '周畅',
-    notes: '此人曾主导Qwen架构，值得跟进其新动向'
-  },
-  {
-    id: '3',
-    company: '月之暗面',
-    type: '融资',
-    title: '完成新一轮战略融资',
-    summary: '传闻估值30亿美元，老股东持续加注，资金用于多模态研发。',
-    date: '2026-06-05',
-    source: 'https://36kr.com',
-    impact: 'medium',
-    keyPeople: '',
-    notes: '待官方确认'
-  },
-  {
-    id: '4',
-    company: 'MiniMax',
-    type: '产品',
-    title: '发布视频生成模型abab-video-1',
-    summary: '支持1080P、60秒视频生成，面向创作者开放API。',
-    date: '2026-06-06',
-    source: 'https://36kr.com',
-    impact: 'medium',
-    keyPeople: '',
-    notes: '与即梦、可灵形成直接竞争'
-  },
-  {
-    id: '5',
-    company: '字节跳动',
-    type: '招聘',
-    title: 'Seed团队大规模扩招',
-    summary: '上海、北京两地新增算法工程师岗位超50个，年薪package上调20%。',
-    date: '2026-06-04',
-    source: 'https://lagou.com',
-    impact: 'medium',
-    keyPeople: '',
-    notes: '关注其薪资水平变化'
-  },
-  {
-    id: '6',
-    company: '百度',
-    type: '合作',
-    title: '与北京市政府签署AI合作协议',
-    summary: '将在政务大模型、智能客服等场景落地，首批覆盖10个委办局。',
-    date: '2026-06-03',
-    source: 'https://baidu.com',
-    impact: 'low',
-    keyPeople: '',
-    notes: 'ToG方向布局加速'
-  }
-];
+// 飞书多维表格配置
+const FEISHU_APP_TOKEN = 'ZWWZbnLhxaraYtsj05jcEGyen5b';
+const FEISHU_TABLE_ID = 'tblPI9yXZi6bHXRy';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('全部');
@@ -107,27 +41,53 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [impactFilter, setImpactFilter] = useState('全部');
   const [expandedCard, setExpandedCard] = useState(null);
+  const [intelData, setIntelData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 从飞书加载数据
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        // 通过API路由获取数据（避免CORS和token暴露）
+        const res = await fetch('/api/intel');
+        if (!res.ok) {
+          throw new Error(`API error: ${res.status}`);
+        }
+        const data = await res.json();
+        setIntelData(data.data || []);
+        setError(null);
+      } catch (err) {
+        console.error('Load data error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
 
   const tabs = ['全部', '组织架构', '人才流动', '融资', '产品', '招聘', '合作'];
-  const companies = ['全部', ...Array.from(new Set(MOCK_DATA.map(d => d.company)))];
+  const companies = ['全部', ...Array.from(new Set(intelData.map(d => d.company)))];
 
   const filteredData = useMemo(() => {
-    return MOCK_DATA.filter(item => {
+    return intelData.filter(item => {
       const tabMatch = activeTab === '全部' || item.type === activeTab;
       const companyMatch = selectedCompany === '全部' || item.company === selectedCompany;
       const impactMatch = impactFilter === '全部' || item.impact === impactFilter;
       const searchMatch = !searchQuery || 
-        item.title.includes(searchQuery) || 
-        item.summary.includes(searchQuery) || 
-        item.company.includes(searchQuery) ||
+        item.title?.includes(searchQuery) || 
+        item.summary?.includes(searchQuery) || 
+        item.company?.includes(searchQuery) ||
         (item.keyPeople && item.keyPeople.includes(searchQuery));
       return tabMatch && companyMatch && impactMatch && searchMatch;
     }).sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [activeTab, selectedCompany, searchQuery, impactFilter]);
+  }, [activeTab, selectedCompany, searchQuery, impactFilter, intelData]);
 
   const highImpactItems = useMemo(() => 
-    MOCK_DATA.filter(d => d.impact === 'high').sort((a, b) => new Date(b.date) - new Date(a.date)), 
-  []);
+    intelData.filter(d => d.impact === '高').sort((a, b) => new Date(b.date) - new Date(a.date)), 
+  [intelData]);
 
   const groupedByDate = useMemo(() => {
     const groups = {};
@@ -147,6 +107,36 @@ export default function Home() {
     const d = new Date(dateStr);
     return `${d.getMonth() + 1}月${d.getDate()}日`;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4 animate-pulse">🎯</div>
+          <div className="text-lg text-slate-400">加载竞品情报中...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⚠️</div>
+          <div className="text-lg text-red-400">加载失败</div>
+          <div className="text-sm text-slate-500 mt-2">{error}</div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 rounded-lg text-sm hover:bg-blue-500 transition"
+          >
+            重试
+          </button>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -174,7 +164,7 @@ export default function Home() {
             </div>
             <div className="text-right">
               <div className="text-sm text-slate-400">{new Date().toLocaleDateString('zh-CN')}</div>
-              <div className="text-xs text-slate-500 mt-1">{MOCK_DATA.length} 条动态 · 2 条高影响</div>
+              <div className="text-xs text-slate-500 mt-1">{intelData.length} 条动态 · {highImpactItems.length} 条高影响</div>
             </div>
           </div>
         </div>
@@ -285,7 +275,7 @@ export default function Home() {
         <section className="mb-6">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {tabs.map(tab => {
-              const count = tab === '全部' ? MOCK_DATA.length : MOCK_DATA.filter(d => d.type === tab).length;
+              const count = tab === '全部' ? intelData.length : intelData.filter(d => d.type === tab).length;
               return (
                 <button
                   key={tab}
